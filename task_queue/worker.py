@@ -1,20 +1,13 @@
-from .utils import exponential_backoff
-import time
-import redis
-import json
+from prometheus_client import start_http_server, Gauge
 
-def process_task(task):
-    try:
-        print(f"Processing task: {task}")
-        time.sleep(2)
-        if task['type'] == 'high_priority' and task.get('retries', 0) < 3:
-            raise Exception("Simulated failure")
-        print(f"Completed task: {task['type']}")
-    except Exception as e:
-        print(f"Task failed: {e}")
-        task['retries'] = task.get('retries', 0) + 1
-        delay = exponential_backoff(task['retries'])
-        r.rpush('task_queue', json.dumps(task))
-        print(f"Retrying task in {delay} seconds...")
+QUEUE_LENGTH = Gauge('redis_queue_length', 'Current length of Redis task queue')
 
-        
+def update_metrics():
+    while True:
+        length = r.llen('task_queue')
+        QUEUE_LENGTH.set(length)
+        time.sleep(5)
+
+if __name__ == "__main__":
+    start_http_server(8000)
+    threading.Thread(target=update_metrics).start()
