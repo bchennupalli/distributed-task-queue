@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Task Dashboard</title>
+  <meta http-equiv="refresh" content="5" />
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    .done { color: green; }
+    .failed { color: red; }
+    .processing { color: orange; }
+    .queued { color: blue; }
+  </style>
+</head>
+<body>
+  <h2>🚀 Task Queue Dashboard</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Task ID</th>
+        <th>Status</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>{{ task.id }}</td>
+        <td class="{{ task.status }}">{{ task.status }}</td>
+        <td>{{ task.result }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

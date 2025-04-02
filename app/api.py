@@ -3,8 +3,14 @@ from pydantic import BaseModel
 from app.config import get_redis_connection
 import json
 import uuid
+from fastapi.responses import HTMLResponse
+from fastapi import Request
+from fastapi.templating import Jinja2Templates
+import re
 
 app = FastAPI()
+templates = Jinja2Templates(directory="app/templates")
+
 redis_client = get_redis_connection()
 
 class TaskRequest(BaseModel):
@@ -39,3 +45,23 @@ def get_task_status(task_id: str):
         'status': data.get(b'status', b'').decode(),
         'result': data.get(b'result', b'').decode()
     }
+
+@app.get('/dashboard', response_class=HTMLResponse)
+def dashboard(request: Request):
+    keys =  redis_client.keys('task:*')
+    tasks = []
+
+    for key in keys:
+        task_id = re.sub(r'^task:', '', key.decode())
+        data = redis_client.hgetall(key)
+
+        tasks.append({
+            'id': task_id,
+            'status': data.get(b'status', b'').decode(),
+            'result': data.get(b'result', b'').decode()
+        })
+
+    return templates.TemplateResponse(
+        "dashboard.html", 
+        {"request": request, "tasks": tasks}
+    )
