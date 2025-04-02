@@ -17,7 +17,8 @@ async def enqueue_task(task: TaskRequest):
     task_data = {
         'id': task_id,
         'type': task.task_type,
-        'payload': task.payload
+        'payload': task.payload,
+        'retries': 0
     }
 
     redis_client.hset(f'task:{task_id}', mapping={
